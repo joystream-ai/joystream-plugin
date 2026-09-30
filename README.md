@@ -27,14 +27,14 @@ A JoyStream account. Sign up at [joystream.ai](https://joystream.ai).
 
 ```
 /plugin marketplace add joystream-ai/joystream-plugin
-/plugin install joystream@joystream
+/plugin install joystream@joystream-ai
 ```
 
 Or from the terminal:
 
 ```
 claude plugin marketplace add joystream-ai/joystream-plugin
-claude plugin install joystream@joystream
+claude plugin install joystream@joystream-ai
 ```
 
 ### Codex
