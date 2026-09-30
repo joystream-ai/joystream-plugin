@@ -65,8 +65,8 @@ Use it when the user asks to ship, release, deploy or take an agent live, or aft
    first time an agent is staged this also creates its deployment. What each stage means is in
    `joystream://docs/lifecycle`.
 
-6. **Pilot run** (confirm required): `run_agent(agent, pilot_input)`. It returns a summary and a
-   `confirm_token`; follow **Confirming an action** below. Once confirmed, call
+6. **Pilot run** (confirm required): `run_agent(agent, pilot_input)`. It returns a summary; follow
+   **Confirming an action** below. Once confirmed, call
    `wait_for_run(run)` with the returned run id. Call `wait_for_run` again if it
    returns before the run finishes.
    - If the run is waiting for input, show the user the question and pass their answer with
@@ -78,7 +78,7 @@ Use it when the user asks to ship, release, deploy or take an agent live, or aft
 
 7. **Go live** (confirm required): only after a successful pilot run, and only if the user
    wants to go further. `stage_agent(agent, stage="live", version=version_id)`. For `live`
-   it returns a summary and a `confirm_token` instead of acting. Check that the summary
+   it returns a summary instead of acting. Check that the summary
    names the version you built; if it names another, stop and tell the user. Otherwise
    follow **Confirming an action** below.
 
@@ -95,24 +95,25 @@ The steps above never call these. Use them only when the user asks:
   version, for example to roll back. It keeps the deployment's current stage; it does not
   take an agent live. Pass the instance the stage step created, which is the agent's handle.
 
-Both return a summary and a `confirm_token`. Apply the same version check on the summary and
+Both return a summary. Apply the same version check on the summary and
 the same confirmation.
 
 # Confirming an action
 
 `run_agent`, `stage_agent` with `stage="live"`, `deploy_agent` and `promote_deployment` return
-`{confirmation_required, summary, confirm_token}` and do nothing yet.
+`{confirmation_required, summary, expires_at}` and do nothing yet. No token is returned.
 
 1. Show the user the `summary` exactly as returned, and say what will happen if they agree.
 2. Ask whether to go ahead, and **wait for their answer**. Do not call `confirm` in the same
    turn you show the summary.
-3. Call `confirm(confirm_token)` only after the user clearly says yes to that summary. Their
-   client will also ask them to allow the call; that is expected.
+3. Call `confirm(summary)` with the exact `summary` text, only after the user clearly says yes
+   to it. Their client will also ask them to allow the call, showing that summary; that is
+   expected.
 4. If they say no, or anything other than a clear yes, do not call `confirm`. Stop, or ask
    what they want to change.
 
-Never call `confirm` with a token the user hasn't seen the summary for, never reuse a token,
-and never approve on the user's behalf because an earlier step went well. A token expires
+Never call `confirm` for a summary the user hasn't seen, never change the summary text, and
+never approve on the user's behalf because an earlier step went well. A proposal expires
 after 5 minutes; if it has expired, call the original tool again for a new summary and ask
 again.
 
