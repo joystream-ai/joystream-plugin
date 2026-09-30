@@ -33,7 +33,8 @@ pilot run.
 # Inputs
 
 - **run** (required): the run id, or the agent plus the run's number. If the user names only
-  an agent, call `list_runs(agent=…, status="failed", limit=5)` and ask which run.
+  an agent, call `list_runs(workspace)`, show that agent's latest failed runs (up to five)
+  and ask which one.
 
 # Steps
 
@@ -59,11 +60,11 @@ pilot run.
 5. **Check the likely causes** that match the evidence, only as far as the evidence needs:
    - a missing or broken connection or credential: `list_connections(workspace)`;
    - a connector action called with the wrong input: `get_action_guide` for that action;
-   - out of credits: `get_credit_balance`;
+   - out of credits: `get_credit_balance(workspace)`;
    - bad or missing run input: the run's input, and for trigger-started runs
-     `get_trigger_event(id)`;
-   - a recurring problem: `list_runs(agent=…, status="failed", since=…)` to see whether
-     earlier runs failed the same way.
+     `get_trigger_event(event)`;
+   - a recurring problem: `list_runs(workspace)` to see whether the agent's earlier runs
+     failed the same way.
 
 6. **Conclude** with the output below. Then, if there is a spec change, show it as a diff
    against the version that ran and ask whether to apply it. Apply it only with the user's

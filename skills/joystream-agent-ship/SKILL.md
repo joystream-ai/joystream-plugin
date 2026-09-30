@@ -1,6 +1,6 @@
 ---
 name: joystream-agent-ship
-description: Take a JoyStream agent from a spec change to a live deployment through the JoyStream MCP server — update, check conformance and readiness, build, stage a pilot, run it, go live — stopping for the user's approval before every run and before going live.
+description: Take a JoyStream agent from a spec change to a live deployment through the JoyStream MCP server — update, check readiness, build, stage a pilot, run it, go live — stopping for the user's approval before every run and before going live.
 license: MIT
 metadata:
   author: joystream
@@ -36,7 +36,7 @@ Use it when the user asks to ship, release, deploy or take an agent live, or aft
 - **agent** (required): the agent's id or name.
 - **spec** (optional): a new spec to apply. Without it, ship the agent's current spec.
 - **pilot_input** (optional): the input for the pilot run. If the agent needs input and none
-  was given, ask the user for it before step 6.
+  was given, ask the user for it before step 5.
 
 # Steps
 
@@ -44,28 +44,24 @@ Use it when the user asks to ship, release, deploy or take an agent live, or aft
    returns validator errors, fix them in the spec and call it again. After three failed
    attempts, stop and show the user the remaining errors.
 
-2. **Conformance**: `get_agent_conformance(agent)`. Fix every error-level flag in the spec and
-   go back to step 1. Report warnings to the user; don't block on them. Stop after three
-   rounds that don't reduce the errors, and show what is left.
-
-3. **Readiness**: `get_agent_readiness(agent)`. For each blocker:
+2. **Readiness**: `get_agent_readiness(agent)`. For each blocker:
    - fixable in the spec: fix it and go back to step 1;
    - needs the user (a missing connection, credential or input): **stop** and tell the user
      exactly what to connect or provide. Continue only after they say it is done, then call
      `get_agent_readiness` again.
 
-4. **Build**: `build_agent(agent)`, then `wait_for_build(agent, build)` with the returned
+3. **Build**: `build_agent(agent)`, then `wait_for_build(agent, build)` with the returned
    build id. If it returns before the build finishes, call `wait_for_build` again. If the
    build fails, **stop**: show the user the failing part of the log from
    `get_build(agent, build)`. When it succeeds, keep the `version_id` it returns: every
    step below passes it explicitly, so they act on this build and not on whatever is
    latest by then.
 
-5. **Stage for the pilot**: `stage_agent(agent, stage="pilot", version=version_id)`. The
+4. **Stage for the pilot**: `stage_agent(agent, stage="pilot", version=version_id)`. The
    first time an agent is staged this also creates its deployment. What each stage means is in
    `joystream://docs/lifecycle`.
 
-6. **Pilot run** (confirm required): `run_agent(agent, pilot_input)`. It returns a summary; follow
+5. **Pilot run** (confirm required): `run_agent(agent, pilot_input)`. It returns a summary; follow
    **Confirming an action** below. Once confirmed, call
    `wait_for_run(run)` with the returned run id. Call `wait_for_run` again if it
    returns before the run finishes.
@@ -76,13 +72,13 @@ Use it when the user asks to ship, release, deploy or take an agent live, or aft
    - If it succeeds, show the user what it did: the stories and the output summary from
      `get_run(run)`.
 
-7. **Go live** (confirm required): only after a successful pilot run, and only if the user
+6. **Go live** (confirm required): only after a successful pilot run, and only if the user
    wants to go further. `stage_agent(agent, stage="live", version=version_id)`. For `live`
    it returns a summary instead of acting. Check that the summary
    names the version you built; if it names another, stop and tell the user. Otherwise
    follow **Confirming an action** below.
 
-8. **Verify and report**: `list_deployments(agent)` and check that the deployment's stage is
+7. **Verify and report**: `list_deployments(agent)` and check that the deployment's stage is
    `live` and its version is the one you built. If not, tell the user what it shows. Report
    the agent, that version, the pilot run id and result, and whether it went live.
 
@@ -121,7 +117,7 @@ again.
 
 Stop and hand back to the user when:
 
-- validator or conformance errors remain after three attempts;
+- validator errors remain after three attempts;
 - readiness needs something only the user can provide;
 - the build fails;
 - the user declines any confirmation;

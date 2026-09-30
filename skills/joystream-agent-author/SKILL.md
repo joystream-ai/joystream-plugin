@@ -50,13 +50,19 @@ To build, test and take an agent live afterwards, use `joystream-agent-ship`.
 
 3. **Find the connector actions.** For each thing the agent must do in a service:
    `search_actions(workspace, query)` with a plain description (for example "list merged
-   pull requests"), then `get_action_guide(workspace, actionId)` for the action you pick. Use the input and
-   output fields exactly as the guide names them. If no action fits, tell the user rather
-   than inventing one.
+   pull requests"), then `get_action_guide(actionId, workspace)` for the action you pick. Use the input and
+   output fields exactly as the guide names them. Each such call is an action step
+   (`step_kind: "action"`, `resolved_action` set to the action id). If no action fits, tell
+   the user rather than inventing one.
 
-4. **Choose skills.** Use catalog skills where one does the job (the spec doc explains how
-   skills are listed and pinned); keep one-off logic, such as which repo or which channel, in
-   the agent's own inputs and prompt.
+4. **Choose skills.** Find catalog skills with `search_skills(workspace, query)`. Use a skill
+   step only with a name `search_skills` returns, pinned to the version it shows. Never
+   invent a skill name: the build fails on one that is not in the catalog. Keep one-off
+   logic, such as which repo or which channel, in the agent's own inputs and prompt.
+
+   Reasoning such as summarizing, filtering or formatting is not a step. Describe it in
+   `system_prompt` and order the actions around it directly in `skill_ordering`. The build
+   adds a model step between those actions that does the work and follows `system_prompt`.
 
 5. **Draft the spec** from the doc and the schema, and show it to the user. Say which
    services and actions it uses and what a run will do. Wait for their go-ahead before
@@ -70,7 +76,7 @@ To build, test and take an agent live afterwards, use `joystream-agent-ship`.
    common-errors list and the schema, and save again. After three attempts that still fail,
    stop and show the user the remaining errors.
 
-8. **Check it.** `get_agent_conformance(agent)` and `get_agent_readiness(agent)`. Fix what the
+8. **Check it.** `get_agent_readiness(agent)`. Fix what the
    spec can fix and save again; report anything only the user can provide, such as a missing
    connection or input.
 
