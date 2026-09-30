@@ -1,0 +1,27 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "joystream",
+  "version": "0.1.0",
+  "description": "Build, ship and debug JoyStream agents through the JoyStream MCP server.",
+  "author": { "name": "JoyStream", "email": "support@joystream.ai", "url": "https://joystream.ai" },
+  "homepage": "https://joystream.ai",
+  "repository": "https://github.com/joystream-ai/joystream-plugin",
+  "license": "MIT",
+  "keywords": ["joystream", "agents", "automation", "mcp"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "JoyStream",
+        "shortDescription": "Build, ship and debug JoyStream agents",
+        "longDescription": "Write JoyStream agent specs, build and run them, take them live, and find out why a run failed, through the JoyStream MCP server. Runs and going live ask for your confirmation first.",
+        "developerName": "JoyStream",
+        "category": "Productivity",
+        "websiteURL": "https://joystream.ai",
+        "defaultPrompt": [
+          "Build a JoyStream agent that summarizes the latest GitHub release and posts it to Slack.",
+          "Why did my last JoyStream run fail?"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "joystream": {
+      "type": "http",
+      "url": "https://api.joystream.ai/mcp"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "joystream",
+  "description": "JoyStream's plugin for building, shipping and debugging JoyStream agents.",
+  "owner": {
+    "name": "JoyStream",
+    "email": "support@joystream.ai",
+    "url": "https://joystream.ai"
+  },
+  "plugins": [
+    {
+      "name": "joystream",
+      "source": "./",
+      "description": "Build, ship and debug JoyStream agents through the JoyStream MCP server.",
+      "author": { "name": "JoyStream" }
+    }
+  ]
+}

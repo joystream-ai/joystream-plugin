@@ -1,0 +1,11 @@
+{
+  "name": "joystream",
+  "displayName": "JoyStream",
+  "description": "Build, ship and debug JoyStream agents through the JoyStream MCP server.",
+  "version": "0.1.0",
+  "author": { "name": "JoyStream", "url": "https://joystream.ai" },
+  "homepage": "https://joystream.ai",
+  "repository": "https://github.com/joystream-ai/joystream-plugin",
+  "license": "MIT",
+  "keywords": ["joystream", "agents", "automation", "mcp"]
+}
