@@ -40,7 +40,8 @@ Use it when the user asks to ship, release, deploy or take an agent live, or aft
 
 # Steps
 
-1. **Update the spec** (only if a new spec was given): `update_agent(agent, spec)`. If it
+1. **Update the spec** (only if a new spec was given): `update_agent(agent, spec, notes)`,
+   with `notes` of one or two sentences on why, in the user's words; never secrets. If it
    returns validator errors, fix them in the spec and call it again. After three failed
    attempts, stop and show the user the remaining errors.
 
