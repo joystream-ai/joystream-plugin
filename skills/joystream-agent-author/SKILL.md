@@ -55,17 +55,38 @@ To build, test and take an agent live afterwards, use `joystream-agent-ship`.
    (`step_kind: "action"`, `resolved_action` set to the action id). If no action fits, tell
    the user rather than inventing one.
 
-4. **Choose skills.** Find catalog skills with `search_skills(workspace, query)`. Use a skill
-   step only with a name `search_skills` returns, pinned to the version it shows. Never
-   invent a skill name: the build fails on one that is not in the catalog. Keep one-off
-   logic, such as which repo or which channel, in the agent's own inputs and prompt.
+4. **Choose skills.** Find catalog skills with `search_skills(workspace, query)`. The query
+   is matched as one phrase against names and descriptions, so try the exact skill name,
+   then single words. Use a skill step only with a name `search_skills` returns, pinned to
+   the version it shows. Never invent a skill name: the build fails on one that is not in
+   the catalog. Keep one-off logic, such as which repo or which channel, in the agent's
+   own inputs and prompt.
+
+   **Wire the calls a skill needs.** A catalog skill step runs as a model step with no
+   tools. Connector calls happen only in action steps the agent declares, so for each
+   skill you use:
+   - Read its instructions (`get_skill`, when the server offers it) and find what it says
+     it needs: each service call, what the call does, its inputs, whether it runs before
+     or after the skill and how often. If the instructions are not available, ask the
+     user what the skill needs instead of guessing.
+   - For each needed call, run step 3: `search_actions` with the service and the skill's
+     description of the call, then `get_action_guide` for the action you pick.
+   - Add it as an action step, ordered in `skill_ordering` as the skill says (a read
+     before the skill, a write after it), and add the service to
+     `requires_credentials`. Put fixed values the skill asks for, such as the largest
+     page size, in `config.bindings`. Give a write call no `retry` unless the skill
+     allows it.
+   - Where the skill's output field names differ from the next action's input names,
+     say in `system_prompt` how they map.
+   - If no action fits a call the skill needs, stop: the agent would run without it.
 
    Reasoning such as summarizing, filtering or formatting is not a step. Describe it in
    `system_prompt` and order the actions around it directly in `skill_ordering`. The build
    adds a model step between those actions that does the work and follows `system_prompt`.
 
 5. **Draft the spec** from the doc and the schema, and show it to the user. Say which
-   services and actions it uses and what a run will do. Wait for their go-ahead before
+   services and actions it uses, which action steps you added for each skill's needs, and
+   what a run will do. Wait for their go-ahead before
    saving it.
 
 6. **Save it.** A new agent: `create_agent(workspace, name, spec)`. An existing one:
@@ -89,7 +110,7 @@ To build, test and take an agent live afterwards, use `joystream-agent-ship`.
 Stop and hand back to the user when:
 
 - a service the agent needs is not connected;
-- no connector action does what the goal needs;
+- no connector action does what the goal, or a skill it uses, needs;
 - the user has not approved the drafted spec;
 - validator errors remain after three attempts.
 
