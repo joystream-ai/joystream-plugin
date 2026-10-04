@@ -68,9 +68,10 @@ To build, test and take an agent live afterwards, use `joystream-agent-ship`.
    services and actions it uses and what a run will do. Wait for their go-ahead before
    saving it.
 
-6. **Save it.** A new agent: `create_agent(workspace, name, spec)`. An existing one:
-   `update_agent(agent, spec)` — read the current spec with `get_agent_spec(agent)` first and
-   change only what the user asked for.
+6. **Save it.** A new agent: `create_agent(workspace, name, spec, notes)`. An existing one:
+   `update_agent(agent, spec, notes)` — read the current spec with `get_agent_spec(agent)` first and
+   change only what the user asked for. Pass `notes`: one or two sentences on why, in the
+   user's words; never secrets. They are saved in the agent's history.
 
 7. **Fix validator errors.** If saving returns errors, fix them in the spec using the doc's
    common-errors list and the schema, and save again. After three attempts that still fail,
