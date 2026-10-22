@@ -65,6 +65,13 @@ pilot run.
      `get_trigger_event(event)`;
    - a recurring problem: `list_runs(workspace)` to see whether the agent's earlier runs
      failed the same way.
+   - a sandbox step that couldn't find a tool (`command not found`, `ModuleNotFoundError`,
+     `Cannot find module`): read `joystream://docs/sandbox`. If the tool isn't in its
+     installed list, the skill's script must install it at the start of the run. That's
+     a change to the skill (category `spec`), not a platform failure. If the doc lists the
+     tool as installed and it still isn't found, it's a platform problem.
+   - a sandbox step killed by its time limit: the limits are in `joystream://docs/sandbox`.
+     A long job should run in the background and be polled, as the doc shows.
 
 6. **Conclude** with the output below. Then, if there is a spec change, show it as a diff
    against the version that ran and ask whether to apply it. Apply it only with the user's

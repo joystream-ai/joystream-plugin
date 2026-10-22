@@ -54,7 +54,10 @@ Use it when the user asks to ship, release, deploy or take an agent live, or aft
 3. **Build**: `build_agent(agent)`, then `wait_for_build(agent, build)` with the returned
    build id. If it returns before the build finishes, call `wait_for_build` again. If the
    build fails, **stop**: show the user the failing part of the log from
-   `get_build(agent, build)`. When it succeeds, keep the `version_id` it returns: every
+   `get_build(agent, build)`. A failure with status `capability_required` means a step
+   runs code but the definition lacks `"capabilities": ["code_execution"]`. Say which step
+   and why in plain words, offer to add the grant with `joystream-agent-author`, and build
+   again once it is saved. When it succeeds, keep the `version_id` it returns: every
    step below passes it explicitly, so they act on this build and not on whatever is
    latest by then.
 
