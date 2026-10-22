@@ -1,6 +1,6 @@
 ---
 name: joystream-agent-ship
-description: Take a JoyStream agent from a spec change to a live deployment through the JoyStream MCP server — update, check readiness, build, stage a pilot, run it, go live — stopping for the user's approval before every run and before going live.
+description: Take a JoyStream agent from a spec change to a live deployment through the JoyStream MCP server — update, check readiness, build, stage a pilot, run it, go live — stopping for the user's approval before every run and before going live. Also use it to run an agent and report what the run did, whenever a run is started from this client.
 license: MIT
 metadata:
   author: joystream
@@ -16,7 +16,9 @@ Running an agent and taking it live change what real users and real services see
 skill never does them without the user's explicit approval.
 
 Use it when the user asks to ship, release, deploy or take an agent live, or after
-`joystream-agent-author` has produced a spec the user wants live.
+`joystream-agent-author` has produced a spec the user wants live. Use **Waiting for a run**
+and **Reporting a run** below whenever you start a run, including a plain "run my agent":
+a run you start is not finished for the user until they have its report.
 
 # Before you start
 
@@ -63,15 +65,13 @@ Use it when the user asks to ship, release, deploy or take an agent live, or aft
    `joystream://docs/lifecycle`.
 
 5. **Pilot run** (confirm required): `run_agent(agent, pilot_input)`. It returns a summary; follow
-   **Confirming an action** below. Once confirmed, call
-   `wait_for_run(run)` with the returned run id. Call `wait_for_run` again if it
-   returns before the run finishes.
+   **Confirming an action** below. Once confirmed, wait for it as **Waiting for a run**
+   says.
    - If the run is waiting for input, show the user the question and pass their answer with
      `answer_input_request(id, answer)`, then keep waiting.
-   - If the run fails, **stop**. Do not go live. Offer to diagnose it with
+   - When it ends, report it as **Reporting a run** says, whatever its result.
+   - If it failed, **stop** after the report. Do not go live. Offer to diagnose it with
      `joystream-agent-debug`.
-   - If it succeeds, show the user what it did: the stories and the output summary from
-     `get_run(run)`.
 
 6. **Go live** (confirm required): only after a successful pilot run, and only if the user
    wants to go further. `stage_agent(agent, stage="live", version=version_id)`. For `live`
@@ -81,7 +81,53 @@ Use it when the user asks to ship, release, deploy or take an agent live, or aft
 
 7. **Verify and report**: `list_deployments(agent)` and check that the deployment's stage is
    `live` and its version is the one you built. If not, tell the user what it shows. Report
-   the agent, that version, the pilot run id and result, and whether it went live.
+   the agent, that version, the pilot run's report, and whether it went live.
+
+# Waiting for a run
+
+Runs take longer than one `wait_for_run` call. A run with only connector actions takes about
+a minute; one that runs code in the sandbox (an audit, documents, data work) takes 5 to 20
+minutes.
+
+1. Keep the run id from `confirm`. Tell the user the run started and roughly how long it
+   should take.
+2. Call `wait_for_run(run, timeout_s=600)`. If it returns with `timed_out: true`, the run is
+   still going, not stuck. Tell the user in one line where it is (`stories_completed` of
+   `stories_total`, and the title of the story whose status is `in_progress`), and call it
+   again. Repeat
+   until the status is final or the run is waiting for input.
+3. Never start another run of the same agent while one is going: it is rejected with
+   `concurrent_run_active`. If you lose track of a run, find it with `list_runs(workspace)`
+   (the agent's newest run) and keep waiting on it.
+4. If the user stops waiting, give them the run id, and say you can report on it later with
+   `get_run(run)`.
+
+# Reporting a run
+
+Every run you start ends with a report to the user, whether it succeeded, failed or was
+stopped. Build it from the result of `wait_for_run` (or `get_run`):
+
+- **Result**: `status`, and `failure_kind` when it failed. Say how long it took
+  (`started_at` to `completed_at`).
+- **What it did**: `output_data.summary`, the run's own summary, in the user's terms.
+- **Each step**: one line per story, with its `title` and `status`, and for a failed story
+  its `error`.
+- **Where results went**: from each action step's output, the link or id the service
+  returned (a Slack or Teams message `webUrl`, a Drive file id). Say "posted to …" with
+  the link.
+- **Files**: the run's files are the `artifacts` with `kind: "file"`, listed by name. Skip
+  `stdout` and `stderr` logs unless the user asks. Offer to download the files with
+  `get_artifact`.
+- **Next**: what you suggest (go live, fix something, diagnose with
+  `joystream-agent-debug`).
+
+A run that ran code can return more than your client shows at once, and you may get a note
+that the result was saved to a file instead. Read the fields above from that file (for
+example with `jq` on `.status`, `.output_data.summary`, `.stories[].title`,
+`.stories[].status`, `.stories[].error` and the `file` artifacts). Don't skip the report
+because the result was large.
+
+If any story is still not finished when the run says it is, say so in the report.
 
 # Deploying to another environment, or re-pinning a version
 
@@ -122,6 +168,6 @@ Stop and hand back to the user when:
 - readiness needs something only the user can provide;
 - the build fails;
 - the user declines any confirmation;
-- the pilot run fails.
+- the pilot run fails (after reporting it).
 
 When you stop, say which step stopped, why, and what the user can do next.
