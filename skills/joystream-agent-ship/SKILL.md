@@ -105,29 +105,47 @@ minutes.
 # Reporting a run
 
 Every run you start ends with a report to the user, whether it succeeded, failed or was
-stopped. Build it from the result of `wait_for_run` (or `get_run`):
+stopped. Build it from the result of `wait_for_run` (or `get_run`), then
+`get_credit_ledger(workspace)`:
 
-- **Result**: `status`, and `failure_kind` when it failed. Say how long it took
-  (`started_at` to `completed_at`).
+- **Result**: `status`, and `failure_kind` when it failed.
+- **Duration**: the whole run (`started_at` to `completed_at`), and each step's
+  (its story's `started_at` to `completed_at`). Name the step that took longest.
+- **Credits used**: add up the ledger's `debit` entries with `reason: "run"` whose
+  `created_at` falls between the run's `started_at` and a minute after its `completed_at`.
+  `amount_millicredits` is thousandths of a credit. Ask for a `limit` that reaches back to
+  the run's start. Group the total by `model` when more than one model was used. The
+  ledger doesn't name the run, so call this an estimate, and say so if another run of the
+  workspace overlapped this one. Also give the balance afterwards
+  (`get_credit_balance(workspace)`).
 - **What it did**: `output_data.summary`, the run's own summary, in the user's terms.
-- **Each step**: one line per story, with its `title` and `status`, and for a failed story
-  its `error`.
+- **Each step**: one line per story, with its `title`, `status` and duration, and for a
+  failed story its `error`.
 - **Where results went**: from each action step's output, the link or id the service
   returned (a Slack or Teams message `webUrl`, a Drive file id). Say "posted to …" with
   the link.
 - **Files**: the run's files are the `artifacts` with `kind: "file"`, listed by name. Skip
   `stdout` and `stderr` logs unless the user asks. Offer to download the files with
   `get_artifact`.
+- **Analysis**: your read of the run, in a few lines. Did it do what the user asked? What
+  stands out in the results (the key numbers or findings in the output)? What went wrong
+  or looks off, even on a run marked completed? For example:
+  - a story still unfinished, or a delivery step that never ran;
+  - a step that retried, or that took much longer than the others;
+  - output that names a different target than the user's input;
+  - results built on partial data (pages that failed to load, rows skipped);
+  - credits well above an earlier run of the same agent (compare with
+    `list_runs(workspace)` when there is one).
+
+  Say what you are unsure of.
 - **Next**: what you suggest (go live, fix something, diagnose with
   `joystream-agent-debug`).
 
 A run that ran code can return more than your client shows at once, and you may get a note
 that the result was saved to a file instead. Read the fields above from that file (for
-example with `jq` on `.status`, `.output_data.summary`, `.stories[].title`,
-`.stories[].status`, `.stories[].error` and the `file` artifacts). Don't skip the report
-because the result was large.
-
-If any story is still not finished when the run says it is, say so in the report.
+example with `jq` on `.status`, `.started_at`, `.completed_at`, `.output_data.summary`,
+`.stories[] | {title, status, started_at, completed_at, error}` and the `file` artifacts).
+Don't skip the report because the result was large.
 
 # Deploying to another environment, or re-pinning a version
 
