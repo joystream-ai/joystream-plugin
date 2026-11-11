@@ -1,6 +1,6 @@
 ---
 name: joystream-agent-author
-description: Write or change a JoyStream agent spec through the JoyStream MCP server — turn what the user wants into a valid definition, choose skills and connected services, find the connector actions it needs, decide whether it runs code in the sandbox (files, conversions, audits, data crunching) and wire that up, and fix validator errors — then hand off to joystream-agent-ship.
+description: Write or change a JoyStream agent spec through the JoyStream MCP server — turn what the user wants into a valid definition, choose skills and connected services, find the connector actions it needs, decide whether it runs code in the sandbox (files, conversions, audits, data crunching) and wire that up, shape its output so every run saves it as a file, and fix validator errors — then hand off to joystream-agent-ship.
 license: MIT
 metadata:
   author: joystream
@@ -43,7 +43,7 @@ To build, test and take an agent live afterwards, use `joystream-agent-ship`.
 1. **Pin down the goal.** Ask for anything the spec needs that the goal does not say: what
    starts a run (on request, on a schedule, from a webhook), what inputs a run takes, where
    the result goes, and which services it touches. Ask once, together, not one question at a
-   time.
+   time. Do not ask whether to save the result as a file: every run saves it (step 6).
 
 2. **Check the connected services.** `list_connections(workspace)`. For every service the
    agent needs that is not connected, **stop** and tell the user to connect it in JoyStream
@@ -84,6 +84,9 @@ To build, test and take an agent live afterwards, use `joystream-agent-ship`.
    Reasoning such as summarizing, filtering or formatting is not a step. Describe it in
    `system_prompt` and order the actions around it directly in `skill_ordering`. The build
    adds a model step between those actions that does the work and follows `system_prompt`.
+   For the agent's output, the thing a person will read, search the catalog by the task
+   ("summary", "report", "digest", the kind of document) and use the skill that writes it
+   when one fits: it has a typed output, which step 6 relies on.
 
 5. **Decide whether the agent needs the sandbox.** Users rarely know the sandbox exists, so
    don't wait for them to ask: decide it from the goal and the skills, every time.
@@ -134,25 +137,57 @@ To build, test and take an agent live afterwards, use `joystream-agent-ship`.
    skill text belong to that agent's workspace; look them up again with `search_skills` for
    this one.
 
-6. **Draft the spec** from the doc and the schema, and show it to the user. Say which
-   services and actions it uses, which action steps you added for each skill's needs,
-   whether it runs code in the sandbox and why, and what a run will do. Wait for their
-   go-ahead before saving it.
+6. **Every run saves its output as a file.** JoyStream does it, in Simulate, Pilot and
+   live: when a run completes, it saves the output of the last step a model wrote (a skill
+   step, or the model step the build adds from `system_prompt`) as a file on the run page.
+   Add no step for it and don't ask; say so in step 7. It is in addition to any delivery
+   (Slack, email), never instead.
 
-7. **Save it.** A new agent: `create_agent(workspace, name, spec, notes)`. An existing one:
+   The format follows the shape of that output, so shape it on purpose:
+
+   | Output | Saved as | Shape it as |
+   |---|---|---|
+   | Prose: a report, summary, brief, digest, notes | `.md` | a Markdown field (`summary_markdown`, `body_md`) |
+   | Rows: a table, a list of companies, people or tickets | `.csv` | one list of flat records (no nested objects) |
+   | Anything else | `.json` | the step's output as it is |
+   | A chart, image, video, PDF, Word, Excel or slide file | the file's own type | written to `/workspace/out/` by the sandbox skill that makes it; that run then gets no extra file |
+
+   Add a `content-file-save` step only when the user names the file, wants a format the
+   table does not give (HTML, plain text), or wants a different step's output saved.
+   Confirm the name with `search_skills` and read it with `get_skill`, when the server
+   offers it. Put it last in `skill_ordering` with `"prior_outputs": "dependencies"`; bind
+   `format` (`"const:\"html\""`), `content_hint` naming the step and field that hold the
+   content (`"const:\"the notion_page.body_md from the summarize step\""`), and
+   `file_name` when the user named it. It runs code, so add
+   `"capabilities": ["code_execution"]` as in step 5. A run that saves its own file gets no
+   second one.
+
+   An image or video that no catalog skill makes cannot be saved as a file: tell the user
+   it is a gap rather than saving a text file in its place. An agent that produces nothing
+   to read (it only acts: creates an account, updates a record, moves a ticket) has no file
+   to mention.
+
+7. **Draft the spec** from the doc and the schema, and show it to the user. Say which
+   services and actions it uses, which action steps you added for each skill's needs,
+   whether it runs code in the sandbox and why, what a run will do, and the file each run
+   saves, stated as a fact with one line offering more, for example: "Each run saves the
+   summary as a Markdown file on the run page. Tell me if you also want it posted to Slack,
+   emailed, or saved to Google Drive." Wait for their go-ahead before saving it.
+
+8. **Save it.** A new agent: `create_agent(workspace, name, spec, notes)`. An existing one:
    `update_agent(agent, spec, notes)` — read the current spec with `get_agent_spec(agent)` first and
    change only what the user asked for. Pass `notes`: one or two sentences on why, in the
    user's words; never secrets. They are saved in the agent's history.
 
-8. **Fix validator errors.** If saving returns errors, fix them in the spec using the doc's
+9. **Fix validator errors.** If saving returns errors, fix them in the spec using the doc's
    common-errors list and the schema, and save again. After three attempts that still fail,
    stop and show the user the remaining errors.
 
-9. **Check it.** `get_agent_readiness(agent)`. Fix what the
+10. **Check it.** `get_agent_readiness(agent)`. Fix what the
    spec can fix and save again; report anything only the user can provide, such as a missing
    connection or input.
 
-10. **Hand off.** Tell the user the agent is saved and valid, and offer to ship it with
+11. **Hand off.** Tell the user the agent is saved and valid, and offer to ship it with
    `joystream-agent-ship`, which builds it, runs a pilot and takes it live, asking before
    each run and before going live.
 
