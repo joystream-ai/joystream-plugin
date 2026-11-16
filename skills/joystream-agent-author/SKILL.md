@@ -16,7 +16,8 @@ actions with the inputs they expect. The spec format is defined by JoyStream its
 skill says how to work with it, not what every field means.
 
 Use it when the user asks to create an agent, or to change what an existing agent does.
-To build, test and take an agent live afterwards, use `joystream-agent-ship`.
+To build an agent, try it in a Simulation and run it for real afterwards, use
+`joystream-agent-ship`.
 
 # Before you start
 
@@ -137,8 +138,8 @@ To build, test and take an agent live afterwards, use `joystream-agent-ship`.
    skill text belong to that agent's workspace; look them up again with `search_skills` for
    this one.
 
-6. **Every run saves its output as a file.** JoyStream does it, in Simulate, Pilot and
-   live: when a run completes, it saves the output of the last step a model wrote (a skill
+6. **Every run saves its output as a file.** JoyStream does it, in a Simulation and in a
+   real Run alike: when a run completes, it saves the output of the last step a model wrote (a skill
    step, or the model step the build adds from `system_prompt`) as a file on the run page.
    Add no step for it and don't ask; say so in step 7. It is in addition to any delivery
    (Slack, email), never instead.
@@ -188,8 +189,8 @@ To build, test and take an agent live afterwards, use `joystream-agent-ship`.
    connection or input.
 
 11. **Hand off.** Tell the user the agent is saved and valid, and offer to ship it with
-   `joystream-agent-ship`, which builds it, runs a pilot and takes it live, asking before
-   each run and before going live.
+   `joystream-agent-ship`, which builds a version, runs a Simulation of it, and asks before
+   any real Run.
 
 # Stop points
 

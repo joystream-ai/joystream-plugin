@@ -2,20 +2,22 @@
 
 Build, ship and debug [JoyStream](https://joystream.ai) agents from your coding agent. The
 plugin connects Claude Code or Codex to the JoyStream MCP server and adds skills that write
-an agent spec, take it live with a pilot run first, and explain why a run failed.
+an agent spec, build it and try it in a Simulation before a real Run, and explain why a run
+failed.
 
 ## What you get
 
 - **`joystream-agent-author`**: turns a request into a valid agent spec, using your
   connected services, catalog skills and connector actions.
-- **`joystream-agent-ship`**: builds the agent, runs a pilot, and takes it live.
+- **`joystream-agent-ship`**: builds a version of the agent, runs a Simulation of it, then a
+  real Run once you approve.
 - **`joystream-agent-debug`**: finds the cause of a failed run and proposes a spec change,
   or says the cause is unclear.
 - **The JoyStream MCP server** at `https://api.joystream.ai/mcp`, connected when you install
   the plugin.
-- **Confirmation for risky actions.** Running an agent, taking it live, deploying,
-  re-pinning a version and connector actions that change something do nothing until you
-  approve the summary the server returns.
+- **Confirmation for risky actions.** A real Run, publishing or cloning on Agent Universe,
+  and connector actions that change something do nothing until you approve the summary the
+  server returns. A Simulation needs no approval: it touches nothing outside JoyStream.
 
 ## Requirements
 
@@ -64,8 +66,9 @@ To revoke access, open **Settings → Connected apps** in JoyStream and select *
 - "Build a JoyStream agent that summarizes the latest release of acme/api on GitHub and
   posts it to #releases in Slack."
 - "Why did my last run of release-digest fail?"
-- "Ship release-digest: build it, run a pilot, and take it live if the pilot passes."
-- "Add a weekday 9am schedule to release-digest."
+- "Ship release-digest: build it, run a Simulation, and do a real Run if the Simulation
+  looks right."
+- "Run version 0.0.3 of release-digest again in a Simulation."
 - "Which of my agents failed this week, and why?"
 
 ## Use the MCP server without the plugin
@@ -106,8 +109,8 @@ for example, open [grok.com/connectors](https://grok.com/connectors), choose
 | Area | Can | Needs your confirmation |
 |---|---|---|
 | Read | Workspaces, agents, versions, specs, runs, tickets, trigger events, credit balance, connectors and their actions | No |
-| Build | Create and update agents, build them, stage them to `dry_run` or `pilot` | No |
-| Run and go live | Run an agent, take it live, deploy, re-pin a version, run connector actions that change something | Yes |
+| Build and simulate | Create and update agents, build sealed versions, run a Simulation (mode `dry_run`) | No |
+| Run | A real Run (mode `live`) of the latest or a named version, publish or clone on Agent Universe, run connector actions that change something | Yes |
 | Can't | Manage members, sharing, vaults, billing or settings | |
 
 It works only with what your JoyStream account can see and do. Viewers can read but not

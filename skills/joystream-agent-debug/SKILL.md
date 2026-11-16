@@ -16,7 +16,7 @@ to one cause, say "unsure" and why; an honest "unsure" is more useful than a con
 answer.
 
 Use it when the user asks why a run failed, or when `joystream-agent-ship` stops on a failed
-pilot run.
+Simulation or Run.
 
 # Before you start
 
