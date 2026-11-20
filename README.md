@@ -134,5 +134,7 @@ from your client.
 ## Links
 
 - [JoyStream](https://joystream.ai)
+- [Privacy Policy](https://joystream.ai/privacy)
+- [Terms of Service](https://joystream.ai/terms)
 - Support: [support@joystream.ai](mailto:support@joystream.ai)
 - License: [MIT](./LICENSE)
