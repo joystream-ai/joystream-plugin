@@ -21,11 +21,19 @@
     "com.openai": {
       "interface": {
         "displayName": "JoyStream",
-        "shortDescription": "Build, ship and debug JoyStream agents",
-        "longDescription": "Write JoyStream agent specs, build and run them, take them live, and find out why a run failed, through the JoyStream MCP server. Runs and going live ask for your confirmation first.",
+        "shortDescription": "Build, run and debug agents",
+        "longDescription": "Create and update JoyStream agents, build a version, test it in a Simulation, then run it for real, and find out why a run failed. Works only inside the JoyStream workspaces your account can see. Connector actions such as posting to Slack run as steps of an agent. A real Run, publishing to Agent Universe and setting agent credentials wait for your approval first.",
         "developerName": "JoyStream",
         "category": "Productivity",
+        "capabilities": [
+          "Read agents, runs and workspaces",
+          "Create, update and build agents",
+          "Simulate agents, then run them with your approval",
+          "Debug failed runs",
+          "Publish agents to Agent Universe"
+        ],
         "websiteURL": "https://joystream.ai",
+        "supportURL": "https://docs.joystream.ai",
         "defaultPrompt": [
           "Build a JoyStream agent that summarizes the latest GitHub release and posts it to Slack.",
           "Why did my last JoyStream run fail?"
