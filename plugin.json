@@ -28,7 +28,7 @@
         "capabilities": [
           "Read agents, runs and workspaces",
           "Create, update and build agents",
-          "Simulate and run agents with your approval",
+          "Simulate agents, then run them with your approval",
           "Debug failed runs",
           "Publish agents to Agent Universe"
         ],
