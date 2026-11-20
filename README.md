@@ -13,8 +13,9 @@ failed.
   real Run once you approve.
 - **`joystream-agent-debug`**: finds the cause of a failed run and proposes a spec change,
   or says the cause is unclear.
-- **The JoyStream MCP server** at `https://api.joystream.ai/mcp`, connected when you install
-  the plugin.
+- **The JoyStream MCP server**, connected when you install the plugin:
+  `https://api.joystream.ai/mcp` in Claude Code, `https://api.joystream.ai/mcp/openai` in
+  Codex (see [Two server URLs](#two-server-urls)).
 - **Confirmation for risky actions.** A real Run, publishing or cloning on Agent Universe,
   and connector actions that change something do nothing until you approve the summary the
   server returns. A Simulation needs no approval: it touches nothing outside JoyStream.
@@ -116,10 +117,22 @@ for example, open [grok.com/connectors](https://grok.com/connectors), choose
 It works only with what your JoyStream account can see and do. Viewers can read but not
 change anything.
 
+### Two server URLs
+
+| URL | Used by | Difference |
+|---|---|---|
+| `https://api.joystream.ai/mcp` | The Claude plugin and Claude connector | Every tool |
+| `https://api.joystream.ai/mcp/openai` | The Codex plugin and the ChatGPT/Codex directory | No `execute_action` |
+
+`execute_action` runs any connector action directly, after you approve its summary. Without
+it, connector actions run as steps of an agent: build the agent, run a Simulation, then a
+real Run. Both URLs use the same sign-in and see the same account. To get `execute_action`
+in Codex, add `https://api.joystream.ai/mcp` yourself as shown above.
+
 ## Troubleshooting
 
 **"Endpoint not found" or 404.** The server URL is wrong. It must be exactly
-`https://api.joystream.ai/mcp`.
+`https://api.joystream.ai/mcp` or `https://api.joystream.ai/mcp/openai`.
 
 **Sign-in keeps coming back.** Sign in to JoyStream in the same browser first, then
 authenticate again from your client. The consent page sends you to the JoyStream login when
