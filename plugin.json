@@ -22,7 +22,7 @@
       "interface": {
         "displayName": "JoyStream",
         "shortDescription": "Build, run and debug agents",
-        "longDescription": "Write JoyStream agent specs, build and run them, take them live, and find out why a run failed, through the JoyStream MCP server. Runs and going live ask for your confirmation first.",
+        "longDescription": "Create and update JoyStream agents, build a version, test it in a Simulation, then run it for real, and find out why a run failed. Works only inside the JoyStream workspaces your account can see. Connector actions such as posting to Slack run as steps of an agent. A real Run, publishing to Agent Universe and setting agent credentials wait for your approval first.",
         "developerName": "JoyStream",
         "category": "Productivity",
         "capabilities": [
