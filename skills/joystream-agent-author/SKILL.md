@@ -67,9 +67,9 @@ To build an agent, try it in a Simulation and run it for real afterwards, use
    **Wire the calls a skill needs.** A catalog skill step runs as a model step with no
    tools. Connector calls happen only in action steps the agent declares, so for each
    skill you use:
-   - Read its instructions (`get_skill`, when the server offers it) and find what it says
+   - Read its summary (the resource `joystream://skills/<name>`) and find what it says
      it needs: each service call, what the call does, its inputs, whether it runs before
-     or after the skill and how often. If the instructions are not available, ask the
+     or after the skill and how often. If the summary does not say, ask the
      user what the skill needs instead of guessing.
    - For each needed call, run step 3: `search_actions` with the service and the skill's
      description of the call, then `get_action_guide` for the action you pick.
@@ -155,8 +155,8 @@ To build an agent, try it in a Simulation and run it for real afterwards, use
 
    Add a `content-file-save` step only when the user names the file, wants a format the
    table does not give (HTML, plain text), or wants a different step's output saved.
-   Confirm the name with `search_skills` and read it with `get_skill`, when the server
-   offers it. Put it last in `skill_ordering` with `"prior_outputs": "dependencies"`; bind
+   Confirm the name with `search_skills` and read it at `joystream://skills/content-file-save`.
+   Put it last in `skill_ordering` with `"prior_outputs": "dependencies"`; bind
    `format` (`"const:\"html\""`), `content_hint` naming the step and field that hold the
    content (`"const:\"the notion_page.body_md from the summarize step\""`), and
    `file_name` when the user named it. It runs code, so add
