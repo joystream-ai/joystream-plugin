@@ -11,6 +11,8 @@
   "icon": "./assets/icon.png",
   "privacyPolicyUrl": "https://joystream.ai/privacy",
   "termsOfServiceUrl": "https://joystream.ai/terms",
+  "supportUrl": "mailto:support@joystream.ai",
+  "documentationUrl": "https://docs.joystream.ai/guides/use-joystream-from-claude-code-or-codex",
   "repository": "https://github.com/joystream-ai/joystream-plugin",
   "license": "MIT",
   "keywords": [
